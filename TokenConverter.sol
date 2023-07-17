@@ -34,9 +34,9 @@ contract ERC223WrapperToken is ERC223Token
         wrapper_for = _wrapper_for;
     }
 
-    function name() public view override returns (string memory) { return IERC223(wrapper_for).name(); }
+    function name() public view override returns (string memory)   { return IERC223(wrapper_for).name(); }
     function symbol() public view override returns (string memory) { return IERC223(wrapper_for).symbol(); }
-    function decimals() public view override returns (uint8) { return IERC223(wrapper_for).decimals(); }
+    function decimals() public view override returns (uint8)       { return IERC223(wrapper_for).decimals(); }
     
     function origin() public view returns (address)
     {
