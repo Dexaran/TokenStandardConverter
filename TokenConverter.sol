@@ -141,7 +141,7 @@ contract TokenStandardConverter is IERC223Recipient
         return true;
     }
 
-/*
+/* This is done via `tokenReceived` fallback function of the ERC-223 deposit.
     function convertERC223toERC20(address _ERC223token, uint256 _amount) public returns (bool)
     {
         require(address(erc223Wrappers[_ERC20token]) != address(0), "ERROR: ERC-223 wrapper for this ERC-20 token does not exist yet.");
