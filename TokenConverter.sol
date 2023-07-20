@@ -31,6 +31,9 @@ contract ERC223WrapperToken is IERC223
     address public creator = msg.sender;
     address public wrapper_for;
 
+    event Transfer(address indexed from, address indexed to, uint256 amount);
+    event TransferData(bytes data);
+
     constructor(address _wrapper_for)
     {
         wrapper_for = _wrapper_for;
@@ -49,7 +52,9 @@ contract ERC223WrapperToken is IERC223
         if(Address.isContract(_to)) {
             IERC223Recipient(_to).tokenReceived(msg.sender, _value, _data);
         }
-        emit Transfer(msg.sender, _to, _value, _data);
+        //emit Transfer(msg.sender, _to, _value, _data);
+        emit Transfer(msg.sender, _to, _value);
+        emit TransferData(_data);
         return true;
     }
     function transfer(address _to, uint _value) public override returns (bool success)
@@ -60,7 +65,9 @@ contract ERC223WrapperToken is IERC223
         if(Address.isContract(_to)) {
             IERC223Recipient(_to).tokenReceived(msg.sender, _value, _empty);
         }
-        emit Transfer(msg.sender, _to, _value, _empty);
+        //emit Transfer(msg.sender, _to, _value, _empty);
+        emit Transfer(msg.sender, _to, _value);
+        emit TransferData(_empty);
         return true;
     }
 
