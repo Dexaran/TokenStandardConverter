@@ -133,7 +133,8 @@ contract TokenStandardConverter is IERC223Recipient
     function convertERC20toERC223(address _ERC20token, uint256 _amount) public returns (bool)
     {
         require(address(erc223Wrappers[_ERC20token]) != address(0), "ERROR: ERC-223 wrapper for this ERC-20 token does not exist yet.");
-        IERC20(_ERC20token).transferFrom(msg.sender, address(this), _amount);
+        bool _result = IERC20(_ERC20token).transferFrom(msg.sender, address(this), _amount);
+        if(!_result) revert(); // Safety check for tokens that return `false` on failed transfer like TheDAO token.
         erc20Supply[_ERC20token] += _amount;
 
         erc223Wrappers[_ERC20token].mint(msg.sender, _amount);
