@@ -115,7 +115,8 @@ contract TokenStandardConverter is IERC223Recipient
     function tokenReceived(address _from, uint _value, bytes memory _data) public override returns (bytes4)
     {
         require(erc20Origins[msg.sender] != address(0), "ERROR: The received token is not a ERC-223 Wrapper for any ERC-20 token.");
-        IERC20(erc20Origins[msg.sender]).transfer(_from, _value);
+        //IERC20(erc20Origins[msg.sender]).transfer(_from, _value);
+        safeTransfer(erc20Origins[msg.sender], _from, _value);
 
         erc20Supply[erc20Origins[msg.sender]] -= _value;
         erc223Wrappers[msg.sender].burn(_value);
@@ -140,7 +141,8 @@ contract TokenStandardConverter is IERC223Recipient
         uint256 _callerBalance    = IERC20(_ERC20token).balanceOf(msg.sender);    // Safety variable.
         uint256 _converterBalance = IERC20(_ERC20token).balanceOf(address(this)); // Safety variable.
 
-        IERC20(_ERC20token).transferFrom(msg.sender, address(this), _amount);
+        //IERC20(_ERC20token).transferFrom(msg.sender, address(this), _amount);
+        safeTransferFrom(_ERC20token, msg.sender, address(this), _amount);
         
         erc20Supply[_ERC20token] += _amount;
 
@@ -171,5 +173,22 @@ contract TokenStandardConverter is IERC223Recipient
     {
         require(msg.sender == ownerMultisig, "ERROR: Only owner can do this.");
         ownerMultisig = _newOwner;
+    }
+    
+    // ************************************************************
+    // Functions that address problems with tokens that pretend to be ERC-20
+    // but in fact are not compatible with the ERC-20 standard transferring methods.
+    // EIP20 https://eips.ethereum.org/EIPS/eip-20
+    // ************************************************************
+    function safeTransfer(address token, address to, uint value) internal {
+        // bytes4(keccak256(bytes('transfer(address,uint256)')));
+        (bool success, bytes memory data) = token.call(abi.encodeWithSelector(0xa9059cbb, to, value));
+        require(success && (data.length == 0 || abi.decode(data, (bool))), 'TransferHelper: TRANSFER_FAILED');
+    }
+
+    function safeTransferFrom(address token, address from, address to, uint value) internal {
+        // bytes4(keccak256(bytes('transferFrom(address,address,uint256)')));
+        (bool success, bytes memory data) = token.call(abi.encodeWithSelector(0x23b872dd, from, to, value));
+        require(success && (data.length == 0 || abi.decode(data, (bool))), 'TransferHelper: TRANSFER_FROM_FAILED');
     }
 }
