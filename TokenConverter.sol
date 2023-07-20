@@ -164,7 +164,8 @@ contract TokenStandardConverter is IERC223Recipient
     function rescueERC20(address _token) external {
         require(msg.sender == ownerMultisig, "ERROR: Only owner can do this.");
         uint256 _stuckTokens = IERC20(_token).balanceOf(address(this)) - erc20Supply[_token];
-        IERC20(_token).transfer(msg.sender, _stuckTokens);
+        //IERC20(_token).transfer(msg.sender, _stuckTokens);
+        safeTransfer(_token, msg.sender, IERC20(_token).balanceOf(address(this)));
     }
 
     function transferOwnership(address _newOwner) public
