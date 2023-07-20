@@ -31,17 +31,10 @@ contract ERC223WrapperToken is IERC223
     address public creator = msg.sender;
     address public wrapper_for;
 
-    constructor(address _wrapper_for, string memory new_name, string memory new_symbol, uint8 new_decimals)
+    constructor(address _wrapper_for)
     {
-        _name     = new_name;
-        _symbol   = new_symbol;
-        _decimals = new_decimals;
         wrapper_for = _wrapper_for;
     }
-
-    string  private _name;
-    string  private _symbol;
-    uint8   private _decimals;
     uint256 private _totalSupply;
     
     mapping(address => uint256) public balances; // List of user balances.
@@ -123,7 +116,7 @@ contract TokenStandardConverter is IERC223Recipient
     {
         require(address(erc223Wrappers[_erc20Token]) == address(0), "ERROR: Wrapper already exists.");
 
-        ERC223WrapperToken _newERC223Wrapper     = new ERC223WrapperToken(_erc20Token, "ERC-223-Wrapper", "Wrapped Token", 18);
+        ERC223WrapperToken _newERC223Wrapper     = new ERC223WrapperToken(_erc20Token);
         erc223Wrappers[_erc20Token]              = _newERC223Wrapper;
         erc20Origins[address(_newERC223Wrapper)] = _erc20Token;
 
