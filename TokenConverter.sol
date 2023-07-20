@@ -138,7 +138,6 @@ contract TokenStandardConverter is IERC223Recipient
     function convertERC20toERC223(address _ERC20token, uint256 _amount) public returns (bool)
     {
         require(address(erc223Wrappers[_ERC20token]) != address(0), "ERROR: ERC-223 wrapper for this ERC-20 token does not exist yet.");
-        uint256 _callerBalance    = IERC20(_ERC20token).balanceOf(msg.sender);    // Safety variable.
         uint256 _converterBalance = IERC20(_ERC20token).balanceOf(address(this)); // Safety variable.
 
         //IERC20(_ERC20token).transferFrom(msg.sender, address(this), _amount);
@@ -147,7 +146,6 @@ contract TokenStandardConverter is IERC223Recipient
         erc20Supply[_ERC20token] += _amount;
 
         require(
-            IERC20(_ERC20token).balanceOf(msg.sender)    + _amount == _callerBalance &&
             IERC20(_ERC20token).balanceOf(address(this)) - _amount == _converterBalance,
             "ERROR: The transfer have not subtracted tokens from callers balance.");
 
