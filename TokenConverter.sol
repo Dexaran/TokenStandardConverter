@@ -10,6 +10,9 @@ import "https://github.com/Dexaran/ERC223-token-standard/blob/development/utils/
  * @dev Interface of the ERC20 standard as defined in the EIP.
  */
 interface IERC20 {
+    function name() external view returns (string memory);
+    function symbol() external view returns (string memory);
+    function decimals() external view returns (uint8);
     function totalSupply() external view returns (uint256);
     function balanceOf(address account) external view returns (uint256);
     function transfer(address to, uint256 value) external returns (bool);
@@ -71,9 +74,9 @@ contract ERC223WrapperToken is IERC223
         return true;
     }
 
-    function name() public view override returns (string memory)   { return IERC223(wrapper_for).name(); }
-    function symbol() public view override returns (string memory) { return IERC223(wrapper_for).symbol(); }
-    function decimals() public view override returns (uint8)       { return IERC223(wrapper_for).decimals(); }
+    function name() public view override returns (string memory)   { return IERC20(wrapper_for).name(); }
+    function symbol() public view override returns (string memory) { return IERC20(wrapper_for).symbol(); }
+    function decimals() public view override returns (uint8)       { return IERC20(wrapper_for).decimals(); }
     function origin() public view returns (address)                { return wrapper_for; }
 
     function mint(address _recipient, uint256 _quantity) external
