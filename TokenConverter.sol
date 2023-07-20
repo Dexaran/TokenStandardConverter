@@ -15,7 +15,7 @@ interface IERC20 {
     function transfer(address to, uint256 value) external returns (bool);
     function allowance(address owner, address spender) external view returns (uint256);
     function approve(address spender, uint256 value) external returns (bool);
-    function transferFrom(address from, address to, uint256 value) external returns (bool);
+    function transferFrom(address from, address to, uint256 value) external; // returns (bool);
 }
 
 
@@ -135,8 +135,8 @@ contract TokenStandardConverter is IERC223Recipient
         require(address(erc223Wrappers[_ERC20token]) != address(0), "ERROR: ERC-223 wrapper for this ERC-20 token does not exist yet.");
         uint256 _callerBalance = IERC20(_ERC20token).balanceOf(msg.sender); // Safety check.
 
-        bool _result = IERC20(_ERC20token).transferFrom(msg.sender, address(this), _amount);
-        if(!_result) revert(); // Safety check for tokens that return `false` on failed transfer like TheDAO token.
+        IERC20(_ERC20token).transferFrom(msg.sender, address(this), _amount);
+        
         erc20Supply[_ERC20token] += _amount;
 
         require(IERC20(_ERC20token).balanceOf(msg.sender) + _amount == _callerBalance, "ERROR: The transfer have not subtracted tokens from callers balance.");
