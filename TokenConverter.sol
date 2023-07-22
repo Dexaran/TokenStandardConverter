@@ -77,6 +77,7 @@ contract ERC223WrapperToken is IERC223
     function name() public view override returns (string memory)   { return IERC20(wrapper_for).name(); }
     function symbol() public view override returns (string memory) { return IERC20(wrapper_for).symbol(); }
     function decimals() public view override returns (uint8)       { return IERC20(wrapper_for).decimals(); }
+    function standard() public view returns (string memory)        { return "223"; }
     function origin() public view returns (address)                { return wrapper_for; }
 
     function mint(address _recipient, uint256 _quantity) external
