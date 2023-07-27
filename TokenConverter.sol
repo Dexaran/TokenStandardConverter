@@ -5,6 +5,7 @@ pragma solidity >=0.8.0;
 import "https://github.com/Dexaran/ERC223-token-standard/blob/development/token/ERC223/IERC223.sol";
 import "https://github.com/Dexaran/ERC223-token-standard/blob/development/token/ERC223/IERC223Recipient.sol";
 import "https://github.com/Dexaran/ERC223-token-standard/blob/development/utils/Address.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/introspection/ERC165.sol";
 
 /**
  * @dev Interface of the ERC20 standard as defined in the EIP.
@@ -18,9 +19,30 @@ interface IERC20 {
     function transfer(address to, uint256 value) external returns (bool);
     function allowance(address owner, address spender) external view returns (uint256);
     function approve(address spender, uint256 value) external returns (bool);
-    function transferFrom(address from, address to, uint256 value) external; // returns (bool);
+    function transferFrom(address from, address to, uint256 value) external returns (bool);
 }
 
+/**
+ * @dev Interface of the ERC20 standard as defined in the EIP.
+ */
+interface IERC223WrapperToken {
+    function name() external view returns (string memory);
+    function symbol() external view returns (string memory);
+    function decimals() external view returns (uint8);
+    function standard() external view returns (string memory);
+    function origin() external  view returns (address);
+
+    function totalSupply() external view returns (uint256);
+    function balanceOf(address account) external view returns (uint256);
+    function transfer(address to, uint256 value) external returns (bool);
+    function transfer(address to, uint256 value, bytes calldata data) external returns (bool);
+    function allowance(address owner, address spender) external view returns (uint256);
+    function approve(address spender, uint256 value) external returns (bool);
+    function transferFrom(address from, address to, uint256 value) external returns (bool);
+
+    function mint(address _recipient, uint256 _quantity) external;
+    function burn(address _recipient, uint256 _quantity) external;
+}
 
 
 /**
@@ -29,7 +51,8 @@ interface IERC20 {
     this version implements `approve` and `transferFrom` features for backwards compatibility reasons
     even though we do not recommend using this pattern to transfer ERC-223 tokens.
 */
-contract ERC223WrapperToken is IERC223
+
+contract ERC223WrapperToken is IERC223, ERC165
 {
     address public creator = msg.sender;
     address public wrapper_for;
@@ -47,6 +70,13 @@ contract ERC223WrapperToken is IERC223
 
     function totalSupply() public view override returns (uint256)             { return _totalSupply; }
     function balanceOf(address _owner) public view override returns (uint256) { return balances[_owner]; }
+
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+        return
+            interfaceId == type(IERC20).interfaceId ||
+            interfaceId == type(IERC223WrapperToken).interfaceId ||
+            super.supportsInterface(interfaceId);
+    }
 
     function transfer(address _to, uint _value, bytes calldata _data) public override returns (bool success)
     {
