@@ -75,6 +75,7 @@ contract ERC223WrapperToken is IERC223, ERC165
         return
             interfaceId == type(IERC20).interfaceId ||
             interfaceId == type(IERC223WrapperToken).interfaceId ||
+            interfaceId == type(IERC223).interfaceId ||
             super.supportsInterface(interfaceId);
     }
 
