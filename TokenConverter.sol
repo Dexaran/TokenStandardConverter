@@ -147,11 +147,11 @@ contract TokenStandardConverter is IERC223Recipient
     function tokenReceived(address _from, uint _value, bytes memory _data) public override returns (bytes4)
     {
         require(erc20Origins[msg.sender] != address(0), "ERROR: The received token is not a ERC-223 Wrapper for any ERC-20 token.");
-        //IERC20(erc20Origins[msg.sender]).transfer(_from, _value);
         safeTransfer(erc20Origins[msg.sender], _from, _value);
 
         erc20Supply[erc20Origins[msg.sender]] -= _value;
-        erc223Wrappers[msg.sender].burn(_value);
+        //erc223Wrappers[msg.sender].burn(_value);
+        ERC223WrapperToken(msg.sender).burn(_value);
 
         return 0x8943ec02;
     }
