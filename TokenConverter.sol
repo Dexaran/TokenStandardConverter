@@ -106,7 +106,7 @@ contract ERC223WrapperToken is IERC223, ERC165
     }
 
     function name() public view override returns (string memory)   { return IERC20(wrapper_for).name(); }
-    function symbol() public view override returns (string memory) { return IERC20(wrapper_for).symbol(); }
+    function symbol() public view override returns (string memory) { return string.concat(IERC20(wrapper_for).name(), "223"); }
     function decimals() public view override returns (uint8)       { return IERC20(wrapper_for).decimals(); }
     function standard() public view returns (string memory)        { return "223"; }
     function origin() public view returns (address)                { return wrapper_for; }
