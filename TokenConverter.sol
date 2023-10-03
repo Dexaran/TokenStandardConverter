@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity >=0.8.0;
+pragma solidity >=0.8.19;
 
 import "https://github.com/Dexaran/ERC223-token-standard/blob/development/token/ERC223/IERC223.sol";
 import "https://github.com/Dexaran/ERC223-token-standard/blob/development/token/ERC223/IERC223Recipient.sol";
@@ -26,18 +26,36 @@ interface IERC20 {
  * @dev Interface of the ERC20 standard as defined in the EIP.
  */
 interface IERC223WrapperToken {
-    function name() external view returns (string memory);
-    function symbol() external view returns (string memory);
+    function name()     external view returns (string memory);
+    function symbol()   external view returns (string memory);
     function decimals() external view returns (uint8);
     function standard() external view returns (string memory);
-    function origin() external  view returns (address);
+    function origin()   external  view returns (address);
 
-    function totalSupply() external view returns (uint256);
-    function balanceOf(address account) external view returns (uint256);
-    function transfer(address to, uint256 value) external returns (bool);
+    function totalSupply()                                            external view returns (uint256);
+    function balanceOf(address account)                               external view returns (uint256);
+    function transfer(address to, uint256 value)                      external returns (bool);
     function transfer(address to, uint256 value, bytes calldata data) external returns (bool);
-    function allowance(address owner, address spender) external view returns (uint256);
-    function approve(address spender, uint256 value) external returns (bool);
+    function allowance(address owner, address spender)                external view returns (uint256);
+    function approve(address spender, uint256 value)                  external returns (bool);
+    function transferFrom(address from, address to, uint256 value)    external returns (bool);
+
+    function mint(address _recipient, uint256 _quantity) external;
+    function burn(address _recipient, uint256 _quantity) external;
+}
+
+interface IERC20WrapperToken {
+    function name()     external view returns (string memory);
+    function symbol()   external view returns (string memory);
+    function decimals() external view returns (uint8);
+    function standard() external view returns (string memory);
+    function origin()   external  view returns (address);
+
+    function totalSupply()                                         external view returns (uint256);
+    function balanceOf(address account)                            external view returns (uint256);
+    function transfer(address to, uint256 value)                   external returns (bool);
+    function allowance(address owner, address spender)             external view returns (uint256);
+    function approve(address spender, uint256 value)               external returns (bool);
     function transferFrom(address from, address to, uint256 value) external returns (bool);
 
     function mint(address _recipient, uint256 _quantity) external;
@@ -91,6 +109,7 @@ contract ERC223WrapperToken is IERC223, ERC165
         emit TransferData(_data);
         return true;
     }
+
     function transfer(address _to, uint _value) public override returns (bool success)
     {
         bytes memory _empty = hex"00000000";
@@ -123,6 +142,73 @@ contract ERC223WrapperToken is IERC223, ERC165
         require(msg.sender == creator, "Only the creator contract can destroy wrapper tokens.");
         balances[msg.sender] -= _quantity;
         _totalSupply -= _quantity;
+    }
+}
+
+contract ERC20WrapperToken is IERC20, ERC165
+{
+    address public creator = msg.sender;
+    address public wrapper_for;
+
+    event Transfer(address indexed from, address indexed to, uint256 amount);
+
+    constructor(address _wrapper_for)
+    {
+        wrapper_for = _wrapper_for;
+    }
+    uint256 private _totalSupply;
+    mapping(address => uint256) public balances; // List of user balances.
+    function balanceOf(address _owner) public view override returns (uint256) { return balances[_owner]; }
+    
+    function name()        public view override returns (string memory) { return IERC20(wrapper_for).name(); }
+    function symbol()      public view override returns (string memory) { return string.concat(IERC223(wrapper_for).name(), "20"); }
+    function decimals()    public view override returns (uint8)         { return IERC20(wrapper_for).decimals(); }
+    function totalSupply() public view override returns (uint256)       { return _totalSupply; }
+    function origin()      public view returns (address)                { return wrapper_for; }
+
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+        return
+            interfaceId == type(IERC20).interfaceId ||
+            interfaceId == type(IERC20WrapperToken).interfaceId ||
+            interfaceId == type(IERC20).interfaceId ||
+            super.supportsInterface(interfaceId);
+    }
+
+    function transfer(address _to, uint _value) public override returns (bool success)
+    {
+        bytes memory _empty = hex"00000000";
+        balances[msg.sender] = balances[msg.sender] - _value;
+        balances[_to] = balances[_to] + _value;
+        emit Transfer(msg.sender, _to, _value);
+        return true;
+    }
+
+    function mint(address _recipient, uint256 _quantity) external
+    {
+        require(msg.sender == creator, "Only the creator contract can mint wrapper tokens.");
+        balances[_recipient] += _quantity;
+        _totalSupply += _quantity;
+    }
+
+    function burn(uint256 _quantity) external
+    {
+        require(msg.sender == creator, "Only the creator contract can destroy wrapper tokens.");
+        balances[msg.sender] -= _quantity;
+        _totalSupply -= _quantity;
+    }
+    
+    function approve(address to, uint256 value)                    public override returns (bool)
+    {
+
+    }
+    function transferFrom(address from, address to, uint256 value) public override returns (bool)
+    {
+
+    }
+
+    function allowance(address who, address spender) public view override returns (uint256)
+    {
+
     }
 }
 
