@@ -274,22 +274,47 @@ contract TokenStandardConverter is IERC223Recipient
     address public ownerMultisig;
 
     mapping (address => ERC223WrapperToken) public erc223Wrappers; // A list of token wrappers. First one is ERC-20 origin, second one is ERC-223 version.
-    mapping (address => address) public erc20Origins;
-    mapping (address => uint256) public erc20Supply; // Token => how much was deposited.
+    mapping (address => ERC20WrapperToken)  public erc20Wrappers;
 
-    function getWrapperFor(address _erc20Token) public view returns (address)
+    mapping (address => address)            public erc223Origins;
+    mapping (address => address)            public erc20Origins;
+    mapping (address => uint256)            public erc20Supply; // Token => how much was deposited.
+
+    function getWrapperFor(address _token) public view returns (address, string memory)
     {
-        return address(erc223Wrappers[_erc20Token]);
+        if ( address(erc223Wrappers[_token]) != address(0) )
+        {
+            return (address(erc223Wrappers[_token]), "ERC-223");
+        }
+        else if ( address(erc20Wrappers[_token]) != address(0) )
+        {
+            return (address(erc20Wrappers[_token]), "ERC-20");
+        }
+        else
+        {
+            return (address(0), "Error");
+        }
     }
 
-    function getOriginFor(address _erc223WrappedToken) public view returns (address)
+    function getOriginFor(address _token) public view returns (address, string memory)
     {
-        return erc20Origins[_erc223WrappedToken];
+        if ( address(erc223Origins[_token]) != address(0) )
+        {
+            return (address(erc223Origins[_token]), "ERC-223");
+        }
+        else if ( address(erc20Origins[_token]) != address(0) )
+        {
+            return (address(erc20Origins[_token]), "ERC-20");
+        }
+        else
+        {
+            return (address(0), "Error");
+        }
     }
 
     function tokenReceived(address _from, uint _value, bytes memory _data) public override returns (bytes4)
     {
-        require(erc20Origins[msg.sender] != address(0), "ERROR: The received token is not a ERC-223 Wrapper for any ERC-20 token.");
+        require(erc20Origins[msg.sender] != address(0), "ERROR: Received token is not a ERC-223 Wrapper for any ERC-20 token.");
         safeTransfer(erc20Origins[msg.sender], _from, _value);
 
         erc20Supply[erc20Origins[msg.sender]] -= _value;
@@ -299,6 +324,7 @@ contract TokenStandardConverter is IERC223Recipient
         return 0x8943ec02;
     }
 
+/*
     function createERC223Wrapper(address _erc20Token) public returns (address)
     {
         require(address(erc223Wrappers[_erc20Token]) == address(0), "ERROR: Wrapper already exists.");
@@ -310,6 +336,7 @@ contract TokenStandardConverter is IERC223Recipient
 
         return address(_newERC223Wrapper);
     }
+*/
 
     function convertERC20toERC223(address _ERC20token, uint256 _amount) public returns (bool)
     {
@@ -346,7 +373,7 @@ contract TokenStandardConverter is IERC223Recipient
 
     function transferOwnership(address _newOwner) public
     {
-        require(msg.sender == ownerMultisig, "ERROR: Only owner can do this.");
+        require(msg.sender == ownerMultisig, "ERROR: Only owner can call this function.");
         ownerMultisig = _newOwner;
     }
     
