@@ -137,14 +137,14 @@ contract ERC223WrapperToken is IERC223, ERC165
 
     function mint(address _recipient, uint256 _quantity) external
     {
-        require(msg.sender == creator, "Only the creator contract can mint wrapper tokens.");
+        require(msg.sender == creator, "Wrapper Token: Only the creator contract can mint wrapper tokens.");
         balances[_recipient] += _quantity;
         _totalSupply += _quantity;
     }
 
     function burn(uint256 _quantity) external
     {
-        require(msg.sender == creator, "Only the creator contract can destroy wrapper tokens.");
+        require(msg.sender == creator, "Wrapper Token: Only the creator contract can destroy wrapper tokens.");
         balances[msg.sender] -= _quantity;
         _totalSupply -= _quantity;
     }
@@ -226,14 +226,14 @@ contract ERC20WrapperToken is IERC20, ERC165
 
     function mint(address _recipient, uint256 _quantity) external
     {
-        require(msg.sender == creator, "Only the creator contract can mint wrapper tokens.");
+        require(msg.sender == creator, "Wrapper Token: Only the creator contract can mint wrapper tokens.");
         balances[_recipient] += _quantity;
         _totalSupply += _quantity;
     }
 
     function burn(uint256 _quantity) external
     {
-        require(msg.sender == creator, "Only the creator contract can destroy wrapper tokens.");
+        require(msg.sender == creator, "Wrapper Token: Only the creator contract can destroy wrapper tokens.");
         balances[msg.sender] -= _quantity;
         _totalSupply -= _quantity;
     }
@@ -246,8 +246,8 @@ contract ERC20WrapperToken is IERC20, ERC165
 
         // Safety checks.
 
-        require(_spender != address(0), "ERC-223: Spender error.");
-        require(_spender != address(this), "ERC-223: Approving to token contract error.");
+        require(_spender != address(0), "ERC-20: Spender error.");
+        require(_spender != address(this), "ERC-20: Approving to token contract error.");
 
         allowances[msg.sender][_spender] = _value;
         emit Approval(msg.sender, _spender, _value);
@@ -257,7 +257,7 @@ contract ERC20WrapperToken is IERC20, ERC165
 
     function transferFrom(address _from, address _to, uint _value) public returns (bool) {
         
-        require(allowances[_from][msg.sender] >= _value, "ERC-223: Insufficient allowance.");
+        require(allowances[_from][msg.sender] >= _value, "ERC-20: Insufficient allowance.");
         
         balances[_from] -= _value;
         allowances[_from][msg.sender] -= _value;
