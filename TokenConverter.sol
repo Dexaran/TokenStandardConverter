@@ -345,20 +345,6 @@ contract TokenStandardConverter is IERC223Recipient
         return this.tokenReceived.selector;
     }
 
-/*
-    function createERC223Wrapper(address _erc20Token) public returns (address)
-    {
-        require(address(erc223Wrappers[_erc20Token]) == address(0), "ERROR: Wrapper already exists.");
-        require(getOriginFor(_erc20Token) == address(0), "ERROR: Cannot convert ERC-223 to ERC-223.");
-
-        ERC223WrapperToken _newERC223Wrapper     = new ERC223WrapperToken(_erc20Token);
-        erc223Wrappers[_erc20Token]              = _newERC223Wrapper;
-        erc20Origins[address(_newERC223Wrapper)] = _erc20Token;
-
-        return address(_newERC223Wrapper);
-    }
-*/
-
     function createERC223Wrapper(address _token) public returns (address)
     {
         require(address(erc223Wrappers[_token]) == address(0), "ERROR: Wrapper already exists.");
@@ -384,6 +370,16 @@ contract TokenStandardConverter is IERC223Recipient
 
         return address(_newERC20Wrapper);
     }
+/* Removed for gas saving reasons.
+    function depositERC20(address _token, uint256 _amount) public returns (bool)
+    {
+        if(isWrapper(_token))
+        {
+            return unwrapERC20toERC223(_token, _amount);
+        }
+        else return wrapERC20toERC223(_token, _amount);
+    }
+*/
 
     function wrapERC20toERC223(address _ERC20token, uint256 _amount) public returns (bool)
     {
