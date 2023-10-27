@@ -332,16 +332,19 @@ contract TokenStandardConverter is IERC223Recipient
             
             return this.tokenReceived.selector;
         }
+        // Otherwise origin for the sender token doesn't exist
+        // There are two possible cases:
+        // 1. ERC-20 wrapper for the deposited token exists
+        // 2. ERC-20 wrapper for the deposited token doesn't exist and must be created.
         else if(address(erc20Wrappers[msg.sender]) == address(0))
         {
+            // Create ERC-20 wrapper if it doesn't exist.
             createERC20Wrapper(msg.sender);
         }
         
+        // Mint ERC-20 wrapper tokens for the deposited ERC-223 token
+        // if the ERC-20 wrapper didn't exist then it was just created in the above statement.
         erc20Wrappers[msg.sender].mint(_from, _value);
- 
-
-        // require(erc20Origins[msg.sender] != address(0), "ERROR: Received token is not a ERC-223 Wrapper for any ERC-20 token.");
-
         return this.tokenReceived.selector;
     }
 
@@ -370,7 +373,7 @@ contract TokenStandardConverter is IERC223Recipient
 
         return address(_newERC20Wrapper);
     }
-/* Removed for gas saving reasons.
+
     function depositERC20(address _token, uint256 _amount) public returns (bool)
     {
         if(isWrapper(_token))
@@ -379,7 +382,6 @@ contract TokenStandardConverter is IERC223Recipient
         }
         else return wrapERC20toERC223(_token, _amount);
     }
-*/
 
     function wrapERC20toERC223(address _ERC20token, uint256 _amount) public returns (bool)
     {
