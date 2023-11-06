@@ -314,8 +314,8 @@ contract TokenStandardConverter is IERC223Recipient
     {
         require(erc223Origins[msg.sender] == address(0), "Error: creating wrapper for a wrapper token.");
         // There are two possible cases:
-        // 1. A user deposited ERC-223 origin token to convert it to ERC-20 wrapper
-        // 2. A user deposited ERC-223 wrapper token to unwrap it to ERC-20 origin.
+        // 1. A user deposited ERC-223 origin token to convert it into ERC-20 wrapper
+        // 2. A user deposited ERC-223 wrapper token to unwrap it into ERC-20 origin.
 
         if(erc20Origins[msg.sender] != address(0))
         {
@@ -374,7 +374,7 @@ contract TokenStandardConverter is IERC223Recipient
 
     function depositERC20(address _token, uint256 _amount) public returns (bool)
     {
-        if(isWrapper(_token))
+        if(erc223Origins[_token] != address(0))
         {
             return unwrapERC20toERC223(_token, _amount);
         }
@@ -408,7 +408,7 @@ contract TokenStandardConverter is IERC223Recipient
     function unwrapERC20toERC223(address _ERC20token, uint256 _amount) public returns (bool)
     {
         require(IERC20(_ERC20token).balanceOf(msg.sender) >= _amount, "Error: Insufficient balance.");
-        require(isWrapper(_ERC20token), "Error: provided token is not a ERC-20 wrapper.");
+        require(erc223Origins[_ERC20token] != address(0), "Error: provided token is not a ERC-20 wrapper.");
 
         ERC20WrapperToken(_ERC20token).burn(msg.sender, _amount);
         
