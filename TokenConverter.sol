@@ -314,8 +314,8 @@ contract TokenStandardConverter is IERC223Recipient
     {
         require(erc223Origins[msg.sender] == address(0), "Error: creating wrapper for a wrapper token.");
         // There are two possible cases:
-        // 1. A user deposited ERC-223 origin token to convert it into ERC-20 wrapper
-        // 2. A user deposited ERC-223 wrapper token to unwrap it into ERC-20 origin.
+        // 1. A user deposited ERC-223 origin token to convert it to ERC-20 wrapper
+        // 2. A user deposited ERC-223 wrapper token to unwrap it to ERC-20 origin.
 
         if(erc20Origins[msg.sender] != address(0))
         {
