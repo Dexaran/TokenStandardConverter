@@ -286,7 +286,7 @@ contract TokenStandardConverter is IERC223Recipient
         {
             return (address(erc20Wrappers[_token]), "ERC-20");
         }
-        
+
         return (address(0), "Error");
     }
 
@@ -300,20 +300,14 @@ contract TokenStandardConverter is IERC223Recipient
         return (address(0), "Error");
     }
 
-    function getOriginFor(address _token) public view returns (address, string memory)
+    function getERC20OriginFor(address _token) public view returns (address)
     {
-        if ( address(erc223Origins[_token]) != address(0) )
-        {
-            return (address(erc223Origins[_token]), "ERC-223");
-        }
-        else if ( address(erc20Origins[_token]) != address(0) )
-        {
-            return (address(erc20Origins[_token]), "ERC-20");
-        }
-        else
-        {
-            return (address(0), "Not defined");
-        }
+        return (address(erc20Origins[_token]));
+    }
+
+    function getERC223OriginFor(address _token) public view returns (address)
+    {
+        return (address(erc223Origins[_token]));
     }
 
     function tokenReceived(address _from, uint _value, bytes memory _data) public override returns (bytes4)
@@ -354,9 +348,9 @@ contract TokenStandardConverter is IERC223Recipient
 
     function createERC223Wrapper(address _token) public returns (address)
     {
-        require(address(erc223Wrappers[_token]) == address(0), "ERROR: Wrapper already exists.");
-        (address _origin, string memory _standard) = getOriginFor(_token);
-        require(_origin == address(0), "ERROR: Cannot create a wrapper for wrapper token.");
+        require(address(erc223Wrappers[_token]) == address(0), "ERROR: Wrapper exists");
+        require(getERC20OriginFor(_token) == address(0), "ERROR: 20 wrapper creation");
+        require(getERC223OriginFor(_token) == address(0), "ERROR: 223 wrapper creation");
 
         ERC223WrapperToken _newERC223Wrapper     = new ERC223WrapperToken(_token);
         erc223Wrappers[_token]                   = _newERC223Wrapper;
@@ -368,8 +362,8 @@ contract TokenStandardConverter is IERC223Recipient
     function createERC20Wrapper(address _token) public returns (address)
     {
         require(address(erc20Wrappers[_token]) == address(0), "ERROR: Wrapper already exists.");
-        (address _origin, string memory _standard) = getOriginFor(_token);
-        require(_origin == address(0), "ERROR: Cannot create a wrapper for wrapper token.");
+        require(getERC20OriginFor(_token) == address(0), "ERROR: 20 wrapper creation");
+        require(getERC223OriginFor(_token) == address(0), "ERROR: 223 wrapper creation");
 
         ERC20WrapperToken _newERC20Wrapper       = new ERC20WrapperToken(_token);
         erc20Wrappers[_token]                    = _newERC20Wrapper;
