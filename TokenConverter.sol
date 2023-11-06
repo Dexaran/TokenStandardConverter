@@ -280,20 +280,24 @@ contract TokenStandardConverter is IERC223Recipient
     mapping (address => address)            public erc20Origins;
     mapping (address => uint256)            public erc20Supply; // Token => how much was deposited.
 
-    function getWrapperFor(address _token) public view returns (address, string memory)
+    function getERC20WrapperFor(address _token) public view returns (address, string memory)
+    {
+        if ( address(erc20Wrappers[_token]) != address(0) )
+        {
+            return (address(erc20Wrappers[_token]), "ERC-20");
+        }
+        
+        return (address(0), "Error");
+    }
+
+    function getERC223WrapperFor(address _token) public view returns (address, string memory)
     {
         if ( address(erc223Wrappers[_token]) != address(0) )
         {
             return (address(erc223Wrappers[_token]), "ERC-223");
         }
-        else if ( address(erc20Wrappers[_token]) != address(0) )
-        {
-            return (address(erc20Wrappers[_token]), "ERC-20");
-        }
-        else
-        {
-            return (address(0), "Error");
-        }
+
+        return (address(0), "Error");
     }
 
     function getOriginFor(address _token) public view returns (address, string memory)
@@ -385,8 +389,6 @@ contract TokenStandardConverter is IERC223Recipient
 
     function wrapERC20toERC223(address _ERC20token, uint256 _amount) public returns (bool)
     {
-        //require(address(erc223Wrappers[_ERC20token]) != address(0), "ERROR: ERC-223 wrapper for this ERC-20 token does not exist yet.");
-
         // If there is no active wrapper for a token that user wants to wrap
         // then create it.
         if(address(erc223Wrappers[_ERC20token]) == address(0))
