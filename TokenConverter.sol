@@ -85,7 +85,7 @@ interface IERC20WrapperToken {
 contract ERC223WrapperToken is IERC223, ERC165
 {
     address public creator = msg.sender;
-    address public wrapper_for;
+    address private wrapper_for;
 
     mapping(address account => mapping(address spender => uint256)) private allowances;
 
@@ -99,7 +99,7 @@ contract ERC223WrapperToken is IERC223, ERC165
     }
     uint256 private _totalSupply;
     
-    mapping(address => uint256) public balances; // List of user balances.
+    mapping(address => uint256) private balances; // List of user balances.
 
     function totalSupply() public view override returns (uint256)             { return _totalSupply; }
     function balanceOf(address _owner) public view override returns (uint256) { return balances[_owner]; }
@@ -169,9 +169,7 @@ contract ERC223WrapperToken is IERC223, ERC165
     function approve(address _spender, uint _value) public returns (bool) {
 
         // Safety checks.
-
         require(_spender != address(0), "ERC-223: Spender error.");
-        require(_spender != address(this), "ERC-223: Approving to token contract error.");
 
         allowances[msg.sender][_spender] = _value;
         emit Approval(msg.sender, _spender, _value);
@@ -208,7 +206,7 @@ contract ERC20WrapperToken is IERC20, ERC165
         wrapper_for = _wrapper_for;
     }
     uint256 private _totalSupply;
-    mapping(address => uint256) public balances; // List of user balances.
+    mapping(address => uint256) private balances; // List of user balances.
 
 
     function balanceOf(address _owner) public view override returns (uint256) { return balances[_owner]; }
@@ -257,7 +255,6 @@ contract ERC20WrapperToken is IERC20, ERC165
         // Safety checks.
 
         require(_spender != address(0), "ERC-20: Spender error.");
-        require(_spender != address(this), "ERC-20: Approving to token contract error.");
 
         allowances[msg.sender][_spender] = _value;
         emit Approval(msg.sender, _spender, _value);
