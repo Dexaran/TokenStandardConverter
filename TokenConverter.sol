@@ -394,11 +394,8 @@ contract TokenStandardConverter is IERC223Recipient
         //IERC20(_ERC20token).transferFrom(msg.sender, address(this), _amount);
         safeTransferFrom(_ERC20token, msg.sender, address(this), _amount);
         
+        _amount = IERC20(_ERC20token).balanceOf(address(this)) - _converterBalance;
         erc20Supply[_ERC20token] += _amount;
-
-        require(
-            IERC20(_ERC20token).balanceOf(address(this)) - _amount == _converterBalance,
-            "ERROR: The transfer have not subtracted tokens from callers balance.");
 
         erc223Wrappers[_ERC20token].mint(msg.sender, _amount);
 
