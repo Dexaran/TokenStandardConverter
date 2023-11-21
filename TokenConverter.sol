@@ -419,7 +419,7 @@ contract TokenStandardConverter is IERC223Recipient
 
         ERC20WrapperToken(_ERC20token).burn(msg.sender, _amount);
         
-        IERC223(erc223Origins[_ERC20token]).transfer(msg.sender, _amount);
+        safeTransfer(erc223Origins[_ERC20token], msg.sender, _amount);
 
         return true;
     }
