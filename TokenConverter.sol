@@ -120,9 +120,8 @@ contract ERC223WrapperToken is IERC223, ERC165
         if(Address.isContract(_to)) {
             IERC223Recipient(_to).tokenReceived(msg.sender, _value, _data);
         }
-        //emit Transfer(msg.sender, _to, _value, _data);
-        emit Transfer(msg.sender, _to, _value);
-        emit TransferData(_data);
+        emit Transfer(msg.sender, _to, _value, _data);
+        emit Transfer(msg.sender, _to, _value); // Old ERC-20 compatible event. Added for backwards compatibility reasons.
 
         return true;
     }
@@ -135,9 +134,8 @@ contract ERC223WrapperToken is IERC223, ERC165
         if(Address.isContract(_to)) {
             IERC223Recipient(_to).tokenReceived(msg.sender, _value, _empty);
         }
-        //emit Transfer(msg.sender, _to, _value, _empty);
-        emit Transfer(msg.sender, _to, _value);
-        emit TransferData(_empty);
+        emit Transfer(msg.sender, _to, _value, _empty);
+        emit Transfer(msg.sender, _to, _value); // Old ERC-20 compatible event. Added for backwards compatibility reasons.
 
         return true;
     }
@@ -230,7 +228,6 @@ contract ERC20WrapperToken is IERC20, ERC165
 
     function transfer(address _to, uint _value) public override returns (bool success)
     {
-        bytes memory _empty = hex"00000000";
         balances[msg.sender] = balances[msg.sender] - _value;
         balances[_to] = balances[_to] + _value;
         emit Transfer(msg.sender, _to, _value);
