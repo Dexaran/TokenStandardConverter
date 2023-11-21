@@ -437,9 +437,10 @@ contract TokenStandardConverter is IERC223Recipient
 
     function rescueERC20(address _token) external {
         require(msg.sender == ownerMultisig, "ERROR: Only owner can do this.");
+        require(address(erc20Wrappers[_token]) == address(0), "Withdrawing ERC-223 origin is not allowed.");
         uint256 _stuckTokens = IERC20(_token).balanceOf(address(this)) - erc20Supply[_token];
         //IERC20(_token).transfer(msg.sender, _stuckTokens);
-        safeTransfer(_token, msg.sender, IERC20(_token).balanceOf(address(this)));
+        safeTransfer(_token, msg.sender, _stuckTokens);
     }
 
     function transferOwnership(address _newOwner) public
