@@ -280,6 +280,9 @@ contract TokenStandardConverter is IERC223Recipient
 {
     address public ownerMultisig;
 
+    event ERC223WrapperCreated(address indexed _token, address indexed _ERC223Wrapper);
+    event ERC20WrapperCreated(address indexed _token, address indexed _ERC20Wrapper);
+
     mapping (address => ERC223WrapperToken) public erc223Wrappers; // A list of token wrappers. First one is ERC-20 origin, second one is ERC-223 version.
     mapping (address => ERC20WrapperToken)  public erc20Wrappers;
 
@@ -363,6 +366,7 @@ contract TokenStandardConverter is IERC223Recipient
         erc223Wrappers[_token]                   = _newERC223Wrapper;
         erc20Origins[address(_newERC223Wrapper)] = _token;
 
+        emit ERC223WrapperCreated(_token, address(_newERC223Wrapper));
         return address(_newERC223Wrapper);
     }
 
@@ -376,6 +380,7 @@ contract TokenStandardConverter is IERC223Recipient
         erc20Wrappers[_token]                    = _newERC20Wrapper;
         erc223Origins[address(_newERC20Wrapper)] = _token;
 
+        emit ERC20WrapperCreated(_token, address(_newERC20Wrapper));
         return address(_newERC20Wrapper);
     }
 
