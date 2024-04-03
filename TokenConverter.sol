@@ -2,10 +2,44 @@
 
 pragma solidity >=0.8.19;
 
-import "https://github.com/Dexaran/ERC223-token-standard/blob/development/token/ERC223/IERC223.sol";
 import "https://github.com/Dexaran/ERC223-token-standard/blob/development/token/ERC223/IERC223Recipient.sol";
 import "https://github.com/Dexaran/ERC223-token-standard/blob/development/utils/Address.sol";
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/introspection/ERC165.sol";
+
+/**
+ * @dev Interface of the ERC223 standard token as defined in the EIP-223 https://eips.ethereum.org/EIPS/eip-223.
+        Using a custom IERC223 here as it redefines the "transfer" function as payable.
+ */
+
+abstract contract IERC223 {
+    
+    function name()        public view virtual returns (string memory);
+    function symbol()      public view virtual returns (string memory);
+    function decimals()    public view virtual returns (uint8);
+    function totalSupply() public view virtual returns (uint256);
+    
+    /**
+     * @dev Returns the balance of the `who` address.
+     */
+    function balanceOf(address who) public virtual view returns (uint);
+        
+    /**
+     * @dev Transfers `value` tokens from `msg.sender` to `to` address
+     * and returns `true` on success.
+     */
+    function transfer(address to, uint value) public virtual returns (bool success);
+        
+    /**
+     * @dev Transfers `value` tokens from `msg.sender` to `to` address with `data` parameter
+     * and returns `true` on success.
+     */
+    function transfer(address to, uint value, bytes calldata data) public payable virtual returns (bool success);
+     
+     /**
+     * @dev Event that is fired on successful transfer.
+     */
+    event Transfer(address indexed from, address indexed to, uint value, bytes data);
+}
 
 /**
  * @dev Interface of the ERC20 standard as defined in the EIP.
@@ -46,8 +80,8 @@ interface IERC223WrapperToken {
 
     function totalSupply()                                            external view returns (uint256);
     function balanceOf(address account)                               external view returns (uint256);
-    function transfer(address to, uint256 value)                      external returns (bool);
-    function transfer(address to, uint256 value, bytes calldata data) external returns (bool);
+    function transfer(address to, uint256 value)                      external payable returns (bool);
+    function transfer(address to, uint256 value, bytes calldata data) external payable returns (bool);
     function allowance(address owner, address spender)                external view returns (uint256);
     function approve(address spender, uint256 value)                  external returns (bool);
     function transferFrom(address from, address to, uint256 value)    external returns (bool);
@@ -113,13 +147,14 @@ contract ERC223WrapperToken is IERC223, ERC165
             super.supportsInterface(interfaceId);
     }
 
-    function transfer(address _to, uint _value, bytes calldata _data) public override returns (bool success)
+    function transfer(address _to, uint _value, bytes calldata _data) public payable override returns (bool success)
     {
         balances[msg.sender] = balances[msg.sender] - _value;
         balances[_to] = balances[_to] + _value;
         if(Address.isContract(_to)) {
             IERC223Recipient(_to).tokenReceived(msg.sender, _value, _data);
         }
+        if (msg.value > 0) payable(_to).transfer(msg.value);
         emit Transfer(msg.sender, _to, _value, _data);
         emit Transfer(msg.sender, _to, _value); // Old ERC-20 compatible event. Added for backwards compatibility reasons.
 
