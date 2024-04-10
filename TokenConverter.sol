@@ -127,10 +127,19 @@ contract ERC223WrapperToken is IERC223, ERC165
     event TransferData(bytes data);
     event Approval(address indexed owner, address indexed spender, uint256 amount);
 
+    /*
     constructor(address _wrapper_for)
     {
         wrapper_for = _wrapper_for;
     }
+    */
+
+    function set(address _wrapper_for) external 
+    {
+        require(msg.sender == creator);
+        wrapper_for = _wrapper_for;
+    }
+
     uint256 private _totalSupply;
     
     mapping(address => uint256) private balances; // List of user balances.
@@ -236,10 +245,19 @@ contract ERC20WrapperToken is IERC20, ERC165
     event Transfer(address indexed from, address indexed to, uint256 amount);
     event Approval(address indexed owner, address indexed spender, uint256 amount);
 
+    /*
     constructor(address _wrapper_for)
     {
         wrapper_for = _wrapper_for;
     }
+    */
+
+    function set(address _wrapper_for) external 
+    {
+        require(msg.sender == creator);
+        wrapper_for = _wrapper_for;
+    }
+
     uint256 private _totalSupply;
     mapping(address => uint256) private balances; // List of user balances.
 
@@ -355,6 +373,27 @@ contract TokenStandardConverter is IERC223Recipient
         return (address(erc223Origins[_token]));
     }
 
+    function predictWrapperAddress(address _token, bool _isERC20) view external returns (address)
+    {
+        bytes memory _bytecode; 
+        if(_isERC20)
+        {
+            _bytecode= type(ERC20WrapperToken).creationCode;
+        }
+        else 
+        {
+            _bytecode= type(ERC223WrapperToken).creationCode;
+        }
+
+        bytes32 hash = keccak256(
+            abi.encodePacked(
+                bytes1(0xff), address(this), keccak256(abi.encode(_token)), keccak256(_bytecode)
+          )
+        );
+
+        return address(uint160(uint(hash)));
+    }
+
     function tokenReceived(address _from, uint _value, bytes memory _data) public override returns (bytes4)
     {
         require(erc223Origins[msg.sender] == address(0), "Error: creating wrapper for a wrapper token.");
@@ -397,7 +436,9 @@ contract TokenStandardConverter is IERC223Recipient
         require(getERC20OriginFor(_token) == address(0), "ERROR: 20 wrapper creation");
         require(getERC223OriginFor(_token) == address(0), "ERROR: 223 wrapper creation");
 
-        ERC223WrapperToken _newERC223Wrapper     = new ERC223WrapperToken(_token);
+        //ERC223WrapperToken _newERC223Wrapper     = new ERC223WrapperToken(_token);
+        ERC223WrapperToken _newERC223Wrapper     = new ERC223WrapperToken{salt: keccak256(abi.encode(_token))}();
+        _newERC223Wrapper.set(_token);  
         erc223Wrappers[_token]                   = _newERC223Wrapper;
         erc20Origins[address(_newERC223Wrapper)] = _token;
 
@@ -411,7 +452,8 @@ contract TokenStandardConverter is IERC223Recipient
         require(getERC20OriginFor(_token) == address(0), "ERROR: 20 wrapper creation");
         require(getERC223OriginFor(_token) == address(0), "ERROR: 223 wrapper creation");
 
-        ERC20WrapperToken _newERC20Wrapper       = new ERC20WrapperToken(_token);
+        ERC20WrapperToken _newERC20Wrapper       = new ERC20WrapperToken{salt: keccak256(abi.encode(_token))}();
+        _newERC20Wrapper.set(_token);
         erc20Wrappers[_token]                    = _newERC20Wrapper;
         erc223Origins[address(_newERC20Wrapper)] = _token;
 
