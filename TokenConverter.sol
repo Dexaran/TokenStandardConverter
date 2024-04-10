@@ -378,11 +378,11 @@ contract TokenStandardConverter is IERC223Recipient
         bytes memory _bytecode; 
         if(_isERC20)
         {
-            _bytecode= type(ERC20WrapperToken).creationCode;
+            _bytecode= type(ERC223WrapperToken).creationCode;
         }
         else 
         {
-            _bytecode= type(ERC223WrapperToken).creationCode;
+            _bytecode= type(ERC20WrapperToken).creationCode;
         }
 
         bytes32 hash = keccak256(
