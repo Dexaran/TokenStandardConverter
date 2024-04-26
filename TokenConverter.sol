@@ -503,6 +503,12 @@ contract TokenStandardConverter is IERC223Recipient
         return true;
     }
 
+    function convertERC20(address _token, uint256 _amount) public returns (bool)
+    {
+        if(isWrapper(_token)) return unwrapERC20toERC223(_token, _amount);
+        else return wrapERC20toERC223(_token, _amount);
+    }
+
     function isWrapper(address _token) public view returns (bool)
     {
         return erc20Origins[_token] != address(0) || erc223Origins[_token] != address(0);
